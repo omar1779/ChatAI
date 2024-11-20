@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}// schema.prisma
+model User {
+  id         String      @id @default(cuid())
+  email      String      @unique
+  password   String
+  name       String?
+  lastname   String?
+  lead       String?
+  membership Membership?
+  products   Product[]   // Relación con los productos del usuario
+  UserConfig UserConfig[]
+}
+
+model UserConfig {
+  id  String @id @default(uuid())
+  prompt String 
+  createdAt DateTime @default(now())
+  updateAt DateTime 
+  userId String 
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Product {
+  id             String      @id @default(uuid())
+  name           String
+  price          Float
+  description    String
+  categoryId     String
+  category       Category    @relation(fields: [categoryId], references: [id])
+  discountId     String?
+  discount       Discount?   @relation(fields: [discountId], references: [id])
+  userId         String      // ID del usuario al que pertenece el producto
+  user           User        @relation(fields: [userId], references: [id])
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  Category Category[] @relation("ProductCategory")
+
+  Discount Discount[] @relation("ProductDiscount")
+}
+
+model Category {
+  id        String    @id @default(uuid())
+  name      String
+  products  Product[] @relation("ProductCategory")
+  Product Product[]
+}
+
+model Discount {
+  id           String   @id @default(uuid())
+  percentage   Float    // El descuento en porcentaje
+  startDate    DateTime // Fecha de inicio
+  endDate      DateTime // Fecha de finalización
+  products     Product[] @relation("ProductDiscount")
+  Product Product[]
+}
+
+model Membership {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id])
+  type        MembershipType
+  startDate   DateTime
+  endDate     DateTime
+}
+
+enum MembershipType {
+  ONE_MONTH
+  THREE_MONTHS
+  ONE_YEAR
+}
