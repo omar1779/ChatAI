@@ -8,7 +8,7 @@ const userRepository = new PrismaUserRepository()
 const loginUserUseCase = new LoginUserUseCase(userRepository)
 
 // Opciones de configuración de NextAuth
-const authOptions: AuthOptions = NextAuth({
+const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -63,7 +63,8 @@ const authOptions: AuthOptions = NextAuth({
     signIn: '/login', // Página personalizada de login
     error: '/login',  // Redirigir a la página de login en caso de error
   },
-})
+}
 
+const handler = NextAuth(authOptions)
 // Exporta NextAuth con las opciones configuradas
-export { authOptions as GET, authOptions as POST }
+export { handler as GET, handler as POST }
